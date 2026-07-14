@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Check if Apps Script URL is configured
-    authState.apiAvailable = SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbw3EWDlnd_e-0ytDLePpOKI8KJGXlxguqBFPklVgjAOYlsyrdiOwYpR8jNkiRcRyFyv/exec';
+    authState.apiAvailable = SCRIPT_URL && SCRIPT_URL.startsWith('https://script.google.com/macros/s/');
 
     if (!authState.apiAvailable) {
         showSetupBanner();
@@ -162,10 +162,6 @@ async function handleLogin(e) {
                     // Redirect to OTP verification
                     authState.pendingSignupEmail = email;
                     document.getElementById('otpEmailDisplay').textContent = email;
-                    authState.currentOTP = result.otp || null;
-                    if (result.otp) {
-                        document.getElementById('otpCodeDisplay').textContent = result.otp;
-                    }
                     showForm('otpForm');
                     startOTPTimer();
                     showToast('Please verify your email first', 'info');
@@ -248,13 +244,8 @@ async function handleSignup(e) {
                 return;
             }
 
-            // Save the OTP from response for demo display
+            // Save the pending email
             authState.pendingSignupEmail = email;
-            authState.currentOTP = result.otp || null;
-
-            if (result.otp) {
-                document.getElementById('otpCodeDisplay').textContent = result.otp;
-            }
 
             document.getElementById('otpEmailDisplay').textContent = email;
             showForm('otpForm');
@@ -275,9 +266,7 @@ async function handleSignup(e) {
 
             const otp = generateOTP();
             authState.pendingSignupEmail = email;
-            authState.currentOTP = otp;
 
-            document.getElementById('otpCodeDisplay').textContent = otp;
             document.getElementById('otpEmailDisplay').textContent = email;
 
             // Store temporarily
@@ -386,15 +375,9 @@ async function resendOTP() {
 
     try {
         if (authState.apiAvailable) {
-            const result = await callAPI('resendOTP', { email });
-            if (result.otp) {
-                document.getElementById('otpCodeDisplay').textContent = result.otp;
-                authState.currentOTP = result.otp;
-            }
+            await callAPI('resendOTP', { email });
         } else {
             const otp = generateOTP();
-            authState.currentOTP = otp;
-            document.getElementById('otpCodeDisplay').textContent = otp;
 
             const localUsers = JSON.parse(localStorage.getItem('sqlcode_users') || '[]');
             const user = localUsers.find(u => u.email === email.toLowerCase());
@@ -433,10 +416,6 @@ async function handleForgot(e) {
             }
 
             authState.pendingSignupEmail = email;
-            if (result.otp) {
-                document.getElementById('resetCodeDisplay').textContent = result.otp;
-                authState.currentOTP = result.otp;
-            }
             showForm('resetForm');
             showToast('Reset code sent to ' + email, 'info');
 
@@ -452,8 +431,6 @@ async function handleForgot(e) {
             localStorage.setItem('sqlcode_users', JSON.stringify(localUsers));
 
             authState.pendingSignupEmail = email;
-            authState.currentOTP = otp;
-            document.getElementById('resetCodeDisplay').textContent = otp;
             showForm('resetForm');
             showToast('Reset code generated (demo)', 'info');
         }

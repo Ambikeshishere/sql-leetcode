@@ -775,13 +775,61 @@ const PROBLEMS = [
 const state = {
     currentPage: 'problems',
     currentProblem: null,
-    solvedProblems: JSON.parse(localStorage.getItem('solvedProblems') || '{}'),
-    submissions: JSON.parse(localStorage.getItem('submissions') || '[]'),
-    streak: parseInt(localStorage.getItem('streak') || '0'),
-    lastVisit: localStorage.getItem('lastVisit') || null,
+    user: null, // set on init
+    solvedProblems: {},  // loaded from API/localStorage per user
+    submissions: [],     // loaded from API/localStorage per user
+    streak: 0,
+    lastVisit: null,
     testCases: [],
     db: null // sql.js database instance
 };
+
+// =============================================
+// APPS SCRIPT API (same JSONP approach as auth.js)
+// =============================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydPOfsAKCnJhGzSEJK05t5ovN7LBrkTxkPGGhJmGi3iUKi4DRl5lw40NBzoKuhHTqa/exec';
+
+async function callAPI(action, data = {}) {
+    const callbackName = 'sqlcode_main_cb_' + Date.now();
+    const params = new URLSearchParams();
+    params.append('action', action);
+    params.append('callback', callbackName);
+    Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+            params.append(key, String(data[key]));
+        }
+    });
+
+    return new Promise((resolve) => {
+        let cleaned = false;
+        function cleanup() {
+            if (cleaned) return;
+            cleaned = true;
+            delete window[callbackName];
+            if (script && script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[callbackName] = function (result) {
+            cleanup();
+            resolve(result);
+        };
+
+        const script = document.createElement('script');
+        script.src = SCRIPT_URL + '?' + params.toString() + '&_=' + Date.now();
+        script.onerror = function () {
+            cleanup();
+            resolve({ success: false, message: 'Failed to connect to server' });
+        };
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+            if (window[callbackName]) {
+                cleanup();
+                resolve({ success: false, message: 'Request timed out' });
+            }
+        }, 15000);
+    });
+}
 
 // =============================================
 // INITIALIZATION
@@ -793,13 +841,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'auth.html';
         return;
     }
-    setupUserMenu(user);
+    state.user = user;
+    state.userKey = user.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
+    // Load per-user data from localStorage first (fast), then sync from API
+    state.solvedProblems = JSON.parse(localStorage.getItem('solved_' + state.userKey) || '{}');
+    state.submissions = JSON.parse(localStorage.getItem('subs_' + state.userKey) || '[]');
+    state.streak = parseInt(localStorage.getItem('streak_' + state.userKey) || '0');
+    state.lastVisit = localStorage.getItem('lastVisit_' + state.userKey) || null;
+
+    setupUserMenu(user);
     await loadSqlEngine();
     updateStreak();
     renderProblemList();
     bindEvents();
     updateStats();
+
+    // Sync submissions from Google Sheet (background)
+    syncSubmissionsFromAPI();
 });
 
 function setupUserMenu(user) {
@@ -826,6 +885,34 @@ function logout() {
     localStorage.removeItem('sqlcode_user');
     sessionStorage.removeItem('sqlcode_user');
     window.location.href = 'auth.html';
+}
+
+// =============================================
+// SYNC SUBMISSIONS FROM API
+// =============================================
+async function syncSubmissionsFromAPI() {
+    try {
+        const result = await callAPI('getSubmissions', { email: state.user.email });
+        if (result.success && result.submissions) {
+            // Merge: API data is the source of truth
+            state.solvedProblems = result.solvedProblems || {};
+            state.submissions = result.submissions.map(s => ({
+                problemId: s.problemId,
+                query: s.query,
+                passed: s.status === 'accepted',
+                date: s.date,
+                runtime: s.runtime
+            }));
+            // Save to localStorage
+            localStorage.setItem('solved_' + state.userKey, JSON.stringify(state.solvedProblems));
+            localStorage.setItem('subs_' + state.userKey, JSON.stringify(state.submissions));
+            updateStats();
+            renderProblemList(getCurrentFilters());
+        }
+    } catch (e) {
+        // Offline or API error — localStorage data is still valid
+        console.log('Sync skipped:', e.message);
+    }
 }
 
 async function loadSqlEngine() {
@@ -860,8 +947,8 @@ function updateStreak() {
     }
 
     state.lastVisit = today;
-    localStorage.setItem('streak', state.streak);
-    localStorage.setItem('lastVisit', today);
+    localStorage.setItem('streak_' + state.userKey, state.streak);
+    localStorage.setItem('lastVisit_' + state.userKey, today);
     document.getElementById('streakCount').textContent = state.streak;
 }
 
@@ -1201,13 +1288,22 @@ function submitQuery() {
     };
 
     state.submissions.unshift(submission);
-    localStorage.setItem('submissions', JSON.stringify(state.submissions));
+    localStorage.setItem('subs_' + state.userKey, JSON.stringify(state.submissions));
 
     if (allPassed) {
         state.solvedProblems[problem.id] = true;
-        localStorage.setItem('solvedProblems', JSON.stringify(state.solvedProblems));
+        localStorage.setItem('solved_' + state.userKey, JSON.stringify(state.solvedProblems));
         updateStats();
         showToast('Accepted! All test cases passed.', 'success');
+
+        // Save to Google Sheet (fire and forget)
+        callAPI('saveSubmission', {
+            email: state.user.email,
+            problemId: problem.id,
+            status: 'accepted',
+            query: sql,
+            runtime: runtime
+        });
 
         // Update solution tab
         document.getElementById('solutionContent').innerHTML = `
@@ -1218,6 +1314,15 @@ function submitQuery() {
         renderProblemList(getCurrentFilters());
     } else {
         showToast('Wrong Answer - Check the results tab', 'error');
+
+        // Save to Google Sheet (fire and forget)
+        callAPI('saveSubmission', {
+            email: state.user.email,
+            problemId: problem.id,
+            status: 'wrong',
+            query: sql,
+            runtime: runtime
+        });
     }
 
     const displayResult = allPassed ? lastResult : firstError;

@@ -66,6 +66,8 @@ function doGet(e) {
     case 'forgotPassword': result = handleForgotPassword(params);break;
     case 'resetPassword':  result = handleResetPassword(params); break;
     case 'checkEmail':     result = handleCheckEmail(params);    break;
+    case 'saveSubmission': result = handleSaveSubmission(params); break;
+    case 'getSubmissions': result = handleGetSubmissions(params); break;
     default:
       result = jsonResponse({ status: 'ok', message: 'SQLCode Backend is running' });
   }
@@ -111,6 +113,10 @@ function doPost(e) {
         return handleResetPassword(data);
       case 'checkEmail':
         return handleCheckEmail(data);
+      case 'saveSubmission':
+        return handleSaveSubmission(data);
+      case 'getSubmissions':
+        return handleGetSubmissions(data);
       default:
         return jsonResponse({ success: false, message: 'Invalid action' });
     }
@@ -257,7 +263,6 @@ function handleSignup(data) {
   return jsonResponse({ 
     success: true, 
     message: 'OTP sent to your email',
-    otp: otp, // For demo - remove in production
     email: email
   });
 }
@@ -372,8 +377,7 @@ function handleResendOTP(data) {
   
   return jsonResponse({ 
     success: true, 
-    message: 'New OTP sent',
-    otp: otp // For demo - remove in production
+    message: 'New OTP sent'
   });
 }
 
@@ -469,8 +473,7 @@ function handleForgotPassword(data) {
   
   return jsonResponse({ 
     success: true, 
-    message: 'Reset code sent to your email',
-    otp: resetToken // For demo - remove in production
+    message: 'Reset code sent to your email'
   });
 }
 
@@ -535,5 +538,103 @@ function handleCheckEmail(data) {
     success: true, 
     exists: !!user,
     verified: user ? user.status === 'active' : false
+  });
+}
+
+// =============================================
+// HELPER: Get Submissions Sheet
+// =============================================
+function getSubmissionsSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Submissions');
+  
+  if (!sheet) {
+    sheet = ss.insertSheet('Submissions');
+    sheet.appendRow([
+      'Email', 'Problem_ID', 'Status', 'Query', 'Runtime', 'Submitted_At'
+    ]);
+    var headerRange = sheet.getRange(1, 1, 1, 6);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#34A853');
+    headerRange.setFontColor('#FFFFFF');
+    sheet.setColumnWidths(1, 6, 150);
+  }
+  
+  return sheet;
+}
+
+// =============================================
+// ACTION: SAVE SUBMISSION
+// =============================================
+function handleSaveSubmission(data) {
+  var email = data.email;
+  var problemId = data.problemId;
+  var status = data.status; // 'accepted' or 'wrong'
+  var query = data.query || '';
+  var runtime = data.runtime || '';
+  
+  if (!email || !problemId) {
+    return jsonResponse({ 
+      success: false, 
+      message: 'Email and problemId are required' 
+    });
+  }
+  
+  var sheet = getSubmissionsSheet();
+  sheet.appendRow([
+    email.toLowerCase().trim(),
+    parseInt(problemId),
+    status,
+    query,
+    runtime,
+    new Date().toISOString()
+  ]);
+  
+  return jsonResponse({ 
+    success: true, 
+    message: 'Submission saved' 
+  });
+}
+
+// =============================================
+// ACTION: GET SUBMISSIONS
+// =============================================
+function handleGetSubmissions(data) {
+  var email = data.email;
+  
+  if (!email) {
+    return jsonResponse({ 
+      success: false, 
+      message: 'Email is required' 
+    });
+  }
+  
+  var sheet = getSubmissionsSheet();
+  var allData = sheet.getDataRange().getValues();
+  var normalizedEmail = email.toLowerCase().trim();
+  var submissions = [];
+  var solved = {};
+  
+  for (var i = 1; i < allData.length; i++) {
+    if (allData[i][0] && allData[i][0].toString().toLowerCase().trim() === normalizedEmail) {
+      submissions.push({
+        problemId: allData[i][1],
+        status: allData[i][2],
+        query: allData[i][3],
+        runtime: allData[i][4],
+        date: allData[i][5]
+      });
+      
+      // Track solved problems
+      if (allData[i][2] === 'accepted') {
+        solved[allData[i][1]] = true;
+      }
+    }
+  }
+  
+  return jsonResponse({ 
+    success: true, 
+    submissions: submissions,
+    solvedProblems: solved
   });
 }
