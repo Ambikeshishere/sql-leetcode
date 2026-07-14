@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLCode - SQL Practice Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="6" rx="8" ry="4"/>
+                    <path d="M4 6v6c0 2.21 3.58 4 8 4s8-1.79 8-4V6"/>
+                    <path d="M4 12v6c0 2.21 3.58 4 8 4s8-1.79 8-4v-6"/>
+                </svg>
+                <span class="logo-text">SQL<span class="logo-accent">Code</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-page="problems">Problems</a>
+                <a href="#" class="nav-link" data-page="submissions">Submissions</a>
+                <a href="#" class="nav-link" data-page="leaderboard">Leaderboard</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="streak-badge" title="Daily Streak">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                <span id="streakCount">0</span>
+            </div>
+            <div class="difficulty-stats">
+                <span class="stat easy" title="Easy Solved">E: <span id="easyCount">0</span></span>
+                <span class="stat medium" title="Medium Solved">M: <span id="medCount">0</span></span>
+                <span class="stat hard" title="Hard Solved">H: <span id="hardCount">0</span></span>
+            </div>
+            <div class="user-avatar" id="userAvatar" title="Profile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content - Problem List View -->
+    <div class="page" id="problemsPage">
+        <div class="page-header">
+            <h1>SQL Problems</h1>
+            <div class="filters">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search problems...">
+                </div>
+                <select id="difficultyFilter">
+                    <option value="all">All Difficulties</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+                <select id="tagFilter">
+                    <option value="all">All Tags</option>
+                    <option value="Select">SELECT</option>
+                    <option value="Joins">Joins</option>
+                    <option value="Aggregation">Aggregation</option>
+                    <option value="Subqueries">Subqueries</option>
+                    <option value="Window Functions">Window Functions</option>
+                    <option value="CTE">CTE</option>
+                    <option value="DML">DML</option>
+                    <option value="DDL">DDL</option>
+                    <option value="Set Operations">Set Operations</option>
+                    <option value="Date/Time">Date/Time</option>
+                    <option value="String">String</option>
+                </select>
+            </div>
+        </div>
+        <div class="problem-stats-bar">
+            <span>Total: <strong id="totalProblems">0</strong></span>
+            <span>Showing: <strong id="showingCount">0</strong></span>
+        </div>
+        <div class="table-container">
+            <table class="problem-table">
+                <thead>
+                    <tr>
+                        <th class="col-status">Status</th>
+                        <th class="col-id">ID</th>
+                        <th class="col-title">Title</th>
+                        <th class="col-difficulty">Difficulty</th>
+                        <th class="col-tags">Tags</th>
+                        <th class="col-acceptance">Acceptance</th>
+                    </tr>
+                </thead>
+                <tbody id="problemListBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Main Content - Problem Workspace View -->
+    <div class="page hidden" id="workspacePage">
+        <div class="workspace-layout">
+            <!-- Left Panel: Problem Description -->
+            <div class="panel left-panel" id="leftPanel">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <button class="panel-tab active" data-tab="description">Description</button>
+                        <button class="panel-tab" data-tab="solution">Solution</button>
+                        <button class="panel-tab" data-tab="submissions-tab">Submissions</button>
+                    </div>
+                    <button class="back-btn" id="backBtn" title="Back to Problems">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content active" id="descriptionTab">
+                        <div class="problem-header-info">
+                            <h2 id="problemTitle">Problem Title</h2>
+                            <span class="difficulty-badge" id="problemDifficulty">Easy</span>
+                        </div>
+                        <div class="problem-meta">
+                            <span class="tag" id="problemTag">SELECT</span>
+                            <span class="acceptance" id="problemAcceptance">Acceptance: 85%</span>
+                        </div>
+                        <div class="problem-description" id="problemDescription">
+                            <!-- Description content -->
+                        </div>
+                        <div class="schema-section">
+                            <h3>Schema</h3>
+                            <div class="schema-table" id="schemaTable">
+                                <!-- Schema content -->
+                            </div>
+                        </div>
+                        <div class="examples-section">
+                            <h3>Example 1</h3>
+                            <div class="example-box" id="exampleBox">
+                                <!-- Example content -->
+                            </div>
+                        </div>
+                        <div class="notes-section" id="notesSection">
+                            <h3>Notes</h3>
+                            <p id="problemNotes"></p>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="solutionTab">
+                        <div class="solution-content" id="solutionContent">
+                            <p class="hint-text">Try solving it first! Solution will be revealed after successful submission.</p>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="submissionsTab">
+                        <div class="submissions-history" id="submissionsHistory">
+                            <p class="hint-text">No submissions yet for this problem.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resize Handle -->
+            <div class="resize-handle" id="resizeHandle">
+                <div class="resize-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+
+            <!-- Right Panel: Editor & Results -->
+            <div class="panel right-panel" id="rightPanel">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <button class="panel-tab active" data-tab="editor">Editor</button>
+                        <button class="panel-tab" data-tab="testcase">Testcase</button>
+                        <button class="panel-tab" data-tab="result">Result</button>
+                    </div>
+                    <div class="editor-actions">
+                        <select id="editorFontSize">
+                            <option value="12">12px</option>
+                            <option value="13">13px</option>
+                            <option value="14" selected>14px</option>
+                            <option value="16">16px</option>
+                            <option value="18">18px</option>
+                        </select>
+                        <button class="btn-reset" id="resetBtn" title="Reset to default">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="tab-content active" id="editorTab">
+                        <div class="editor-container">
+                            <div class="editor-gutter" id="editorGutter"></div>
+                            <textarea id="sqlEditor" spellcheck="false" placeholder="Write your SQL query here..."></textarea>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="testcaseTab">
+                        <div class="testcase-container">
+                            <div class="testcase-header">
+                                <span>Test Input</span>
+                                <button class="btn-small" id="addTestCase">+ Add Case</button>
+                            </div>
+                            <div class="testcase-list" id="testCaseList">
+                                <!-- Test cases populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="resultTab">
+                        <div class="result-container" id="resultContainer">
+                            <div class="result-placeholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+                                <p>Run your query to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Buttons -->
+                <div class="action-bar">
+                    <div class="action-left">
+                        <button class="btn-run" id="runBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            Run
+                        </button>
+                    </div>
+                    <div class="action-right">
+                        <span class="runtime" id="runtimeDisplay"></span>
+                        <button class="btn-submit" id="submitBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions Page -->
+    <div class="page hidden" id="submissionsPage">
+        <div class="page-header">
+            <h1>My Submissions</h1>
+        </div>
+        <div class="table-container">
+            <table class="problem-table" id="allSubmissionsTable">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Problem</th>
+                        <th>Language</th>
+                        <th>Runtime</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="allSubmissionsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div class="page hidden" id="leaderboardPage">
+        <div class="page-header">
+            <h1>Leaderboard</h1>
+            <p class="subtitle">Top SQL practitioners this week</p>
+        </div>
+        <div class="leaderboard-container" id="leaderboardContainer">
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
