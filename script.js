@@ -787,12 +787,46 @@ const state = {
 // INITIALIZATION
 // =============================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Auth check
+    const user = JSON.parse(localStorage.getItem('sqlcode_user') || sessionStorage.getItem('sqlcode_user') || 'null');
+    if (!user) {
+        window.location.href = 'auth.html';
+        return;
+    }
+    setupUserMenu(user);
+
     await loadSqlEngine();
     updateStreak();
     renderProblemList();
     bindEvents();
     updateStats();
 });
+
+function setupUserMenu(user) {
+    const name = user.name || 'User';
+    const email = user.email || '';
+    const initial = name.charAt(0).toUpperCase();
+
+    document.getElementById('userInitial').textContent = initial;
+    document.getElementById('userName').textContent = name.split(' ')[0];
+    document.getElementById('dropdownName').textContent = name;
+    document.getElementById('dropdownEmail').textContent = email;
+
+    // Toggle dropdown on avatar click
+    const avatar = document.getElementById('userAvatar');
+    const dropdown = document.getElementById('userDropdown');
+    avatar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('visible');
+    });
+    document.addEventListener('click', () => dropdown.classList.remove('visible'));
+}
+
+function logout() {
+    localStorage.removeItem('sqlcode_user');
+    sessionStorage.removeItem('sqlcode_user');
+    window.location.href = 'auth.html';
+}
 
 async function loadSqlEngine() {
     // sql.js is loaded via <script> tag from CDN

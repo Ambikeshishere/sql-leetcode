@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLCode - Sign In</title>
+    <link rel="stylesheet" href="auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-grid"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+        <div class="floating-code" id="floatingCode"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="auth-container">
+        <!-- Left Panel - Branding -->
+        <div class="brand-panel">
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <ellipse cx="12" cy="6" rx="8" ry="4"/>
+                        <path d="M4 6v6c0 2.21 3.58 4 8 4s8-1.79 8-4V6"/>
+                        <path d="M4 12v6c0 2.21 3.58 4 8 4s8-1.79 8-4v-6"/>
+                    </svg>
+                </div>
+                <h1 class="brand-name">SQL<span>Code</span></h1>
+                <p class="brand-tagline">Master SQL through practice</p>
+
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        </div>
+                        <div>
+                            <strong>15+ SQL Problems</strong>
+                            <span>SELECT, JOINs, Window Functions, CTEs</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        </div>
+                        <div>
+                            <strong>Real SQL Execution</strong>
+                            <span>SQLite engine running in your browser</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                        </div>
+                        <div>
+                            <strong>Track Progress</strong>
+                            <span>Streaks, stats, and leaderboard</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="brand-code-preview">
+                    <div class="code-window-bar">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="file-name">query.sql</span>
+                    </div>
+                    <pre class="code-content"><code><span class="kw">SELECT</span> e.name, e.salary,
+  <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> e.department
+    <span class="kw">ORDER BY</span> e.salary <span class="kw">DESC</span>
+  ) <span class="kw">AS</span> salary_rank
+<span class="kw">FROM</span> employees e
+<span class="kw">WHERE</span> e.salary > <span class="num">50000</span>;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Auth Forms -->
+        <div class="form-panel">
+            <!-- Login Form -->
+            <div class="auth-form" id="loginForm">
+                <div class="form-header">
+                    <h2>Welcome back</h2>
+                    <p>Sign in to continue your SQL journey</p>
+                </div>
+
+                <form id="loginFormElement" novalidate>
+                    <div class="input-group">
+                        <label for="loginEmail">Email address</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="loginEmailError"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+                            <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="loginPasswordError"></span>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-link" onclick="showForm('forgotForm'); return false;">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="loginBtn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loader hidden">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+
+                    <div class="divider">
+                        <span>or continue with</span>
+                    </div>
+
+                    <div class="social-login">
+                        <button type="button" class="btn-social btn-google" onclick="socialLogin('google')">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            Google
+                        </button>
+                        <button type="button" class="btn-social btn-github" onclick="socialLogin('github')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </button>
+                    </div>
+                </form>
+
+                <div class="form-footer">
+                    Don't have an account? <a href="#" onclick="showForm('signupForm'); return false;">Create one</a>
+                </div>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="auth-form hidden" id="signupForm">
+                <div class="form-header">
+                    <h2>Create account</h2>
+                    <p>Start mastering SQL today</p>
+                </div>
+
+                <form id="signupFormElement" novalidate>
+                    <div class="input-group">
+                        <label for="signupName">Full name</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <input type="text" id="signupName" placeholder="John Doe" required>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="signupNameError"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signupEmail">Email address</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="email" id="signupEmail" placeholder="you@example.com" required>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="signupEmailError"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signupPassword">Password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" id="signupPassword" placeholder="Min 6 characters" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('signupPassword', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="signupPasswordError"></span>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                            <span class="strength-text" id="strengthText"></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="signupConfirm">Confirm password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <input type="password" id="signupConfirm" placeholder="Re-enter password" required>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="signupConfirmError"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="signupBtn">
+                        <span class="btn-text">Create Account</span>
+                        <span class="btn-loader hidden">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    Already have an account? <a href="#" onclick="showForm('loginForm'); return false;">Sign in</a>
+                </div>
+            </div>
+
+            <!-- OTP Verification Form -->
+            <div class="auth-form hidden" id="otpForm">
+                <div class="form-header">
+                    <div class="otp-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </div>
+                    <h2>Verify your email</h2>
+                    <p>We sent a 6-digit code to <strong id="otpEmailDisplay"></strong></p>
+                </div>
+
+                <form id="otpFormElement" novalidate>
+                    <div class="otp-inputs" id="otpInputs">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="0" inputmode="numeric" pattern="[0-9]" autocomplete="one-code">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="1" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="2" inputmode="numeric" pattern="[0-9]">
+                        <span class="otp-separator">-</span>
+                        <input type="text" maxlength="1" class="otp-digit" data-index="3" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="4" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="5" inputmode="numeric" pattern="[0-9]">
+                    </div>
+                    <span class="input-error" id="otpError"></span>
+
+                    <div class="otp-demo-box" id="otpDemoBox">
+                        <div class="otp-demo-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                            Demo Mode
+                        </div>
+                        <p>Your verification code: <strong class="otp-code-display" id="otpCodeDisplay"></strong></p>
+                        <p class="otp-note">In production, this would be sent to your email.</p>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="verifyBtn">
+                        <span class="btn-text">Verify Email</span>
+                        <span class="btn-loader hidden">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+
+                    <div class="resend-otp">
+                        <span id="otpTimer">Resend code in <strong>60s</strong></span>
+                        <a href="#" class="hidden" id="resendLink" onclick="resendOTP(); return false;">Resend code</a>
+                    </div>
+                </form>
+
+                <div class="form-footer">
+                    <a href="#" onclick="showForm('signupForm'); return false;">&larr; Back to sign up</a>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div class="auth-form hidden" id="forgotForm">
+                <div class="form-header">
+                    <div class="otp-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                    </div>
+                    <h2>Reset password</h2>
+                    <p>Enter your email and we'll send you a reset code</p>
+                </div>
+
+                <form id="forgotFormElement" novalidate>
+                    <div class="input-group">
+                        <label for="forgotEmail">Email address</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="email" id="forgotEmail" placeholder="you@example.com" required>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="forgotEmailError"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="forgotBtn">
+                        <span class="btn-text">Send Reset Code</span>
+                        <span class="btn-loader hidden">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <a href="#" onclick="showForm('loginForm'); return false;">&larr; Back to sign in</a>
+                </div>
+            </div>
+
+            <!-- Reset Password Form -->
+            <div class="auth-form hidden" id="resetForm">
+                <div class="form-header">
+                    <div class="otp-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h2>Set new password</h2>
+                    <p>Enter the code from your email and choose a new password</p>
+                </div>
+
+                <form id="resetFormElement" novalidate>
+                    <div class="input-group">
+                        <label for="resetCode">Reset code</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="text" id="resetCode" placeholder="Enter 6-digit code" maxlength="6" required>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="resetCodeError"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="resetPassword">New password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" id="resetPassword" placeholder="Min 6 characters" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('resetPassword', this)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <div class="input-highlight"></div>
+                        </div>
+                        <span class="input-error" id="resetPasswordError"></span>
+                    </div>
+
+                    <div class="otp-demo-box" id="resetDemoBox">
+                        <div class="otp-demo-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                            Demo Mode
+                        </div>
+                        <p>Your reset code: <strong class="otp-code-display" id="resetCodeDisplay"></strong></p>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="resetBtn">
+                        <span class="btn-text">Reset Password</span>
+                        <span class="btn-loader hidden">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                        </span>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <a href="#" onclick="showForm('loginForm'); return false;">&larr; Back to sign in</a>
+                </div>
+            </div>
+
+            <!-- Success State -->
+            <div class="auth-form hidden" id="successForm">
+                <div class="success-content">
+                    <div class="success-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <h2 id="successTitle">Account Created!</h2>
+                    <p id="successMessage">Your account has been verified. Redirecting...</p>
+                    <div class="success-spinner">
+                        <svg class="spinner" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="auth.js"></script>
+</body>
+</html>
