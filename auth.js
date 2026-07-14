@@ -8,7 +8,7 @@
 // After deploying the gscript.gs, you get a URL like:
 // https://script.google.com/macros/s/AKfycb...xxxxx.../exec
 // =============================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3EWDlnd_e-0ytDLePpOKI8KJGXlxguqBFPklVgjAOYlsyrdiOwYpR8jNkiRcRyFyv/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydPOfsAKCnJhGzSEJK05t5ovN7LBrkTxkPGGhJmGi3iUKi4DRl5lw40NBzoKuhHTqa/exec';
 
 // =============================================
 // STATE
